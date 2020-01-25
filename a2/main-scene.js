@@ -78,11 +78,24 @@ window.Cube_Outline = window.classes.Cube_Outline =
             //  TODO (Requirement 5).
             // When a set of lines is used in graphics, you should think of the list entries as
             // broken down into pairs; each pair of vertices will be drawn as a line segment.
+            this.positions.push(...Vec.cast(
+                [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [1, 1, 1], [-1, 1, 1],
+                [-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [-1, 1, 1], [1, -1, 1], [1, -1, -1], [1, 1, 1], [1, 1, -1],
+                [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, -1], [-1, -1, -1], [1, 1, -1], [-1, 1, -1]));
 
+            this.colors.push(Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
+                          Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
+                          Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
+                          Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
+                          Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
+                          Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
+                          Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1));  
+                            
             this.indexed = false;       // Do this so we won't need to define "this.indices".
 
             
         }
+
     };
 
 window.Cube_Single_Strip = window.classes.Cube_Single_Strip =
@@ -132,12 +145,20 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             this.lights = [new Light(Vec.of(0, 5, 5, 1), Color.of(1, .4, 1, 1), 100000)];
 
             this.set_colors();
-            this.colors;
+            this.colorsArr;
         }
 
         set_colors() {
             // TODO:  Create a class member variable to store your cube's colors.
 
+            this.colorsArr = [Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1),
+                              Color.of(Math.random(),Math.random(),Math.random(),1)];
         }
 
         make_control_panel()             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
