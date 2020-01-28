@@ -1,3 +1,4 @@
+
 window.Cube = window.classes.Cube =
     class Cube extends Shape {
         // Here's a complete, working example of a Shape subclass.  It is a blueprint for a cube.
@@ -32,7 +33,7 @@ window.Transforms_Sandbox = window.classes.Transforms_Sandbox =
         // exposing that one function, which draws everything, this creates a very small code
         // sandbox for editing a simple scene, and for experimenting with matrix transforms.
         {
-            let model_transform = Mat4.identity();
+             let model_transform = Mat4.identity();
             // Variable model_transform will be a temporary matrix that helps us draw most shapes.
             // It starts over as the identity every single frame - coordinate axes at the origin.
             graphics_state.lights = this.lights;
@@ -46,7 +47,7 @@ window.Transforms_Sandbox = window.classes.Transforms_Sandbox =
              **********************************/
 
             const blue = Color.of(0, 0, 1, 1), yellow = Color.of(1, 1, 0, 1);
-            model_transform = model_transform.times(Mat4.translation([0, 3, 20]));
+/*            model_transform = model_transform.times(Mat4.translation([0, 3, 20]));
             this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));
             // Draw the top box.
 
@@ -67,6 +68,14 @@ window.Transforms_Sandbox = window.classes.Transforms_Sandbox =
                 .times(Mat4.scale([1, 2, 1]))      // Stretch the coordinate frame.
                 .times(Mat4.translation([0, -1.5, 0]));     // Translate down enough for the two volumes to miss.
             this.shapes.box.draw(graphics_state, model_transform, this.plastic.override({color: yellow}));   // Draw the bottom box.
+*/
+            const colors = [blue, yellow, blue, yellow, blue, yellow, blue, yellow];
+            model_transform = model_transform.times(Mat4.translation([1,-1,0]));
+            for(var i = 0; i < 8; i++)
+            {
+                model_transform = model_transform.times(Mat4.translation([0,2,0]))
+                this.shapes.box.draw(graphics_state,model_transform,this.plastic.override({color: colors[i]}));
+            }   
         }
     };
 
@@ -79,9 +88,10 @@ window.Cube_Outline = window.classes.Cube_Outline =
             // When a set of lines is used in graphics, you should think of the list entries as
             // broken down into pairs; each pair of vertices will be drawn as a line segment.
             this.positions.push(...Vec.cast(
-                [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [1, 1, 1], [-1, 1, 1],
-                [-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [-1, 1, 1], [1, -1, 1], [1, -1, -1], [1, 1, 1], [1, 1, -1],
-                [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, -1], [-1, -1, -1], [1, 1, -1], [-1, 1, -1]));
+                                          [-1,-1,-1], [1,-1,-1], [-1,-1,1], [1,-1,1], [1,1,-1],  [-1,1,-1],  [1,1,1],  [-1,1,1],
+                                          [-1,-1,-1], [-1,-1,1], [-1,1,-1], [-1,1,1], [1,-1,1],  [1,-1,-1],  [1,1,1],  [1,1,-1],
+                                          [-1,-1,1],  [1,-1,1],  [-1,1,1],  [1,1,1], [1,-1,-1], [-1,-1,-1], [1,1,-1], [-1,1,-1], 
+                                          [-1,-1,-1], [-1,1,-1], [-1,-1,1], [-1,1,1], [1,-1,-1], [1,1,-1], [1,1,1], [1,-1,1]) );
 
             this.colors.push(Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
                           Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), Color.of(1, 1, 1, 1), 
@@ -146,6 +156,8 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
 
             this.set_colors();
             this.colorsArr;
+            this.outlineFlag = false;
+            this.stillFlag = false;
         }
 
         set_colors() {
@@ -165,19 +177,52 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
         {
             this.key_triggered_button("Change Colors", ["c"], this.set_colors);    // Add a button for controlling the scene.
             this.key_triggered_button("Outline", ["o"], () => {
-
+                this.outlineFlag = !this.outlineFlag;
                 // TODO:  Requirement 5b:  Set a flag here that will toggle your outline on and off
             });
             this.key_triggered_button("Sit still", ["m"], () => {
-
+                this.stillFlag = !this.stillFlag;
                 // TODO:  Requirement 3d:  Set a flag here that will toggle your swaying motion on and off.
             });
         }
 
-        draw_box(graphics_state, model_transform) {
+        draw_box(graphics_state, model_transform, boxNum) {
             // TODO:  Helper function for requirement 3 (see hint).
             //        This should make changes to the model_transform matrix, draw the next box, and return the newest model_transform.
 
+            const t = this.t = graphics_state.animation_time / 1000;
+
+            var color = this.colorsArr[boxNum];
+            
+            const maxAngle = -.04*Math.PI;
+
+            var rotationAngle;
+            if(!this.stillFlag){
+                rotationAngle = (maxAngle/2) + ((maxAngle/2)*(Math.sin(6*Math.PI*t)));
+            }
+            else
+            {
+                rotationAngle = maxAngle;
+            }
+            if(boxNum != 0){
+                model_transform = model_transform.times(Mat4.translation([0,2,0]))
+                                  .times(Mat4.translation([1,-1,0]))
+                                  .times(Mat4.rotation(rotationAngle, Vec.of(0,0,1)))
+                                  .times(Mat4.translation([-1,1,0]));
+
+                if(!this.outlineFlag){
+                    this.shapes.box.draw(graphics_state,model_transform,this.plastic.override({color}));
+                }
+                else
+                {
+                    this.shapes.outline.draw(graphics_state, model_transform, this.white, "LINES");
+                }
+            }
+            else
+            {
+                this.shapes.box.draw(graphics_state,model_transform,this.plastic.override({color}));
+            }
+        
             return model_transform;
         }
 
@@ -187,5 +232,12 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             let model_transform = Mat4.identity();
 
             // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
+
+                for(var i = 0; i < 8; i++){
+                    model_transform = this.draw_box(graphics_state,model_transform,i);
+                }
+         
+
         }
     };
+     
