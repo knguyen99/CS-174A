@@ -241,10 +241,11 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
                 rotationAngle = maxAngle;
             }
             if(boxNum != 0){
-                model_transform = model_transform.times(Mat4.translation([0,2,0]))
-                                  .times(Mat4.translation([1,-1,0]))
+                model_transform = model_transform.times(Mat4.translation([0,3,0]))
+                                  .times(Mat4.translation([1,-1.5,0]))
                                   .times(Mat4.rotation(rotationAngle, Vec.of(0,0,1)))
-                                  .times(Mat4.translation([-1,1,0]));
+                                  .times(Mat4.translation([-1,1.5,0]))
+                                  .times(Mat4.scale([1,1.5,1]));
 
                 if(!this.outlineFlag){
                     this.shapes.box.draw(graphics_state,model_transform,this.plastic.override({color}));
@@ -253,10 +254,13 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
                 {
                     this.shapes.outline.draw(graphics_state, model_transform, this.white, "LINES");
                 }
+                model_transform = model_transform.times(Mat4.scale([1,2/3,1]));
             }
             else
             {
-                this.shapes.strip.draw(graphics_state,model_transform,this.plastic.override({color}));
+                model_transform = model_transform.times(Mat4.scale([1,1.5,1]));
+                this.shapes.strip.draw(graphics_state,model_transform,this.plastic.override({color}), "TRIANGLE_STRIP");
+                model_transform = model_transform.times(Mat4.scale([1,2/3,1]));
             }
         
             return model_transform;
