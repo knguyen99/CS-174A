@@ -1,4 +1,3 @@
-
 window.Cube = window.classes.Cube =
     class Cube extends Shape {
         // Here's a complete, working example of a Shape subclass.  It is a blueprint for a cube.
@@ -114,6 +113,43 @@ window.Cube_Single_Strip = window.classes.Cube_Single_Strip =
             super("positions", "normals");
 
             // TODO (Extra credit part I)
+
+            this.positions.push(...Vec.cast(
+                        [1,1,1],[-1,1,1],[1,-1,1], //front
+                        [-1,-1,1],[-1,1,1],[1,-1,1],
+                        [1,1,1],[1,-1,1],[1,1,-1], //right
+                        [1,1,-1],[1,-1,-1],[1,-1,1],
+                        [-1,1,-1],[1,1,-1],[1,1,1], //top
+                        [-1,1,1],[-1,1,-1],[1,1,1],
+                        [1,1,-1],[-1,1,-1],[1,-1,-1], //back
+                        [-1,-1,-1],[-1,1,-1],[1,-1,-1], 
+                        [-1,1,1],[-1,-1,1],[-1,1,-1],//left
+                        [-1,1,-1],[-1,-1,-1],[-1,-1,1],
+                        [-1,-1,1],[-1,-1,-1],[1,-1,1], //bottom
+                        [-1,-1,-1],[1,-1,-1],[1,-1,1], 
+                    
+                    
+            ));
+
+            this.normals.push(...Vec.cast(
+                        [1,1,1],[-1,1,1],[1,-1,1], //front
+                        [-1,-1,1],[-1,1,1],[1,-1,1],
+                        [1,1,1],[1,-1,1],[1,1,-1], //right
+                        [1,1,-1],[1,-1,-1],[1,-1,1],
+                        [-1,1,-1],[1,1,-1],[1,1,1], //top
+                        [-1,1,1],[-1,1,-1],[1,1,1],
+                        [1,1,-1],[-1,1,-1],[1,-1,-1], //back
+                        [-1,-1,-1],[-1,1,-1],[1,-1,-1], 
+                        [-1,1,1],[-1,-1,1],[-1,1,-1],//left
+                        [-1,1,-1],[-1,-1,-1],[-1,-1,1],
+                        [-1,-1,1],[-1,-1,-1],[1,-1,1], //bottom
+                        [-1,-1,-1],[1,-1,-1],[1,-1,1], 
+                    
+            ));
+
+            //this.indices.push(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35);
+
+            this.indexed = false;
         }
     };
 
@@ -220,7 +256,7 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
             }
             else
             {
-                this.shapes.box.draw(graphics_state,model_transform,this.plastic.override({color}));
+                this.shapes.strip.draw(graphics_state,model_transform,this.plastic.override({color}));
             }
         
             return model_transform;
@@ -240,4 +276,4 @@ window.Assignment_Two_Scene = window.classes.Assignment_Two_Scene =
 
         }
     };
-     
+
