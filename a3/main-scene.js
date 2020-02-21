@@ -16,10 +16,12 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             const shapes = {
                 torus: new Torus(15, 15),
-                torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15)
+                torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
 
                 // TODO:  Fill in as many additional shape instances as needed in this key/value table.
                 //        (Requirement 1)
+                sphere1: new Subdivision_Sphere(4),
+                sphere2: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(2)
             };
             this.submit_shapes(context, shapes);
 
@@ -27,10 +29,12 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.materials =
                 {
                     test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .2}),
-                    ring: context.get_instance(Ring_Shader).material()
+                    ring: context.get_instance(Ring_Shader).material(),
 
                     // TODO:  Fill in as many additional material objects as needed in this key/value table.
                     //        (Requirement 1)
+                    sun: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1})
+
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -56,9 +60,31 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
 
             // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 2 and 3)
+            
 
+            //this.shapes.torus2.draw(graphics_state, Mat4.identity(), this.materials.test);
+            
+            //sun stuff
+            let sun_controls = Mat4.identity();
+            let sun_radius = 2 + Math.sin(.2*Math.PI*t);
+            let sun_color = .5+.5*Math.sin(.2*Math.PI*t);
 
-            this.shapes.torus2.draw(graphics_state, Mat4.identity(), this.materials.test);
+            sun_controls = sun_controls.times(Mat4.scale([sun_radius,sun_radius,sun_radius]));
+            graphics_state.lights = [new Light(Vec.of(0,0,0,1), Color.of(sun_color,0,1-sun_color,1), 10**sun_radius)];
+            this.shapes.sphere1.draw(graphics_state, sun_controls, this.materials.sun.override({color: Color.of(sun_color,0,1-sun_color,1)}));
+
+            
+            //planet 1
+            let planet1_controls = Mat4.identity();
+            planet1_controls = planet1_controls.times(Mat4.rotation(t,Vec.of(0,1,0)))
+                                                .times(Mat4.translation([5,0,0]))
+                                                .times(Mat4.rotation(t,Vec.of(0,1,0)))
+                                                .times(Mat4.scale([1,1,1]));
+            this.planet_1 = planet1_controls;
+            this.shapes.sphere2.draw(graphics_state,planet1_controls,this.materials.test.override({ color: Color.of(.37,.3,.5,1),
+                                                                                                    ambient: 0,
+                                                                                                    specularity: 0,
+                                                                                                    diffusivity: 1}))
 
         }
     };
