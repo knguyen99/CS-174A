@@ -21,7 +21,11 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 // TODO:  Fill in as many additional shape instances as needed in this key/value table.
                 //        (Requirement 1)
                 sphere1: new Subdivision_Sphere(4),
-                sphere2: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(2)
+                sphere2: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
+                sphere3: new Subdivision_Sphere(3),
+                sphere4: new Subdivision_Sphere(4),
+                sphere5: new Subdivision_Sphere(4),
+                sphere6: new (Subdivision_Sphere.prototype.make_flat_shaded_version())(1)
             };
             this.submit_shapes(context, shapes);
 
@@ -33,8 +37,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
                     // TODO:  Fill in as many additional material objects as needed in this key/value table.
                     //        (Requirement 1)
-                    sun: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1})
-
+                    sun: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: 1}),
+                    
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -80,12 +84,75 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                                                 .times(Mat4.translation([5,0,0]))
                                                 .times(Mat4.rotation(t,Vec.of(0,1,0)))
                                                 .times(Mat4.scale([1,1,1]));
-            this.planet_1 = planet1_controls;
             this.shapes.sphere2.draw(graphics_state,planet1_controls,this.materials.test.override({ color: Color.of(.37,.3,.5,1),
                                                                                                     ambient: 0,
                                                                                                     specularity: 0,
-                                                                                                    diffusivity: 1}))
+                                                                                                    diffusivity: 1}));    
 
+            //planet 2                                                                                                                                                                     
+            let planet2_controls = Mat4.identity();
+            planet2_controls = planet2_controls.times(Mat4.rotation(t*.8,Vec.of(0,1,0)))
+                                                .times(Mat4.translation([8,0,0]))
+                                                .times(Mat4.rotation(t,Vec.of(0,1,0)))
+                                                .times(Mat4.scale([1,1,1]));
+                                  
+            this.shapes.sphere3.draw(graphics_state,planet2_controls,this.materials.test.override({ color: Color.of(.3,.66,.6,1),
+                                                                                                    ambient: 0,
+                                                                                                    specularity: 1,
+                                                                                                    diffusivity: .25,
+                                                                                                    gouraud: (Math.floor(t)%2)}));
+
+            //planet 3                                                                                                                                                                     
+            let planet3_controls = Mat4.identity();
+            planet3_controls = planet3_controls.times(Mat4.rotation(t*.6,Vec.of(0,1,0)))
+                                                .times(Mat4.translation([11,0,0]))
+                                                .times(Mat4.rotation(t,Vec.of(1,1,1)))
+                                                .times(Mat4.scale([1,1,1]));
+            this.shapes.sphere4.draw(graphics_state,planet3_controls,this.materials.test.override({ color: Color.of(.5,.32,.12,1),
+                                                                                                    ambient: 0,
+                                                                                                    specularity: 1,
+                                                                                                    diffusivity: 1}));
+            let planet3_rings = planet3_controls.times(Mat4.scale([1,1,.1]));
+            /*this.shapes.torus.draw(graphics_state,planet3_rings,this.materials.test.override({ color: Color.of(.5,.32,.12,1),
+                                                                                                    ambient: 0,
+                                                                                                    specularity: 1,
+                                                                                                    diffusivity: 1}));
+            */
+            this.shapes.torus.draw(graphics_state,planet3_rings, this.materials.ring);
+            
+            //planet 4
+            let planet4_controls = Mat4.identity();
+            planet4_controls = planet4_controls.times(Mat4.rotation(t*.4,Vec.of(0,1,0)))
+                                                .times(Mat4.translation([14,0,0]))
+                                                .times(Mat4.rotation(t,Vec.of(0,1,0)))
+                                                .times(Mat4.scale([1,1,1]));
+            this.shapes.sphere5.draw(graphics_state,planet4_controls,this.materials.test.override({ color: Color.of(.13,.2,.5,1),
+                                                                                                    ambient: 0,
+                                                                                                    specularity: 1,
+                                                                                                    diffusivity: 1}));
+            //moon 
+            let moon_controls = Mat4.identity();
+            moon_controls = planet4_controls;
+            moon_controls = moon_controls.times(Mat4.rotation(t*.4,Vec.of(0,1,0)))
+                                            .times(Mat4.translation([2,0,0]))
+                                            .times(Mat4.rotation(t,Vec.of(0,1,0)));
+            this.shapes.sphere6.draw(graphics_state,moon_controls,this.materials.test.override({ color: Color.of(.1,.2,.1,1),
+                                                                                                    ambient: 0,
+                                                                                                    specularity: 1,
+                                                                                                    diffusivity: 1}));
+            //camera 
+            this.planet_1 = planet1_controls;
+            this.planet_2 = planet2_controls;
+            this.planet_3 = planet3_controls;
+            this.planet_4 = planet4_controls;
+            this.moon = moon_controls;
+
+            if(this.attached != undefined)
+            {
+                let desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5])));
+                graphics_state.camera_transform = desired.map((x,i) => Vec.from(graphics_state.camera_transform[i]).mix(x,.1));
+            }
+                                                                                                                                                                                                                                                                                                                                                                                                            
         }
     };
 
@@ -135,6 +202,9 @@ window.Ring_Shader = window.classes.Ring_Shader =
 
         void main()
         { 
+            position = vec4(object_space_pos,1);
+            center = vec4(0,0,0,1);
+            gl_Position = projection_camera_transform * model_transform * vec4(object_space_pos,1);
         }`;           // TODO:  Complete the main function of the vertex shader (Extra Credit Part II).
         }
 
@@ -143,6 +213,7 @@ window.Ring_Shader = window.classes.Ring_Shader =
             return `
         void main()
         { 
+            gl_FragColor = vec4(.5,.32,.12, sin(25.0 * distance(position,center)));
         }`;           // TODO:  Complete the main function of the fragment shader (Extra Credit Part II).
         }
     };
