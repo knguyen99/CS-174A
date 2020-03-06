@@ -8,7 +8,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (!context.globals.has_controls)
                 context.register_scene_component(new Movement_Controls(context, control_box.parentElement.insertCell()));
 
-            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 100, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1));
+            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, -50, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1));
             this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
 
             const r = context.width / context.height;
@@ -19,13 +19,15 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 torus: new Torus(15, 15),
                 torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
             };
+
+            shapes.ground.texture_coords = shapes.ground.texture_coords.map( x => x.times(4) );
             this.submit_shapes(context, shapes);
 
             // Make some Material objects available to you:
             this.materials =
                 {
                     test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .2}),
-                    ground: context.get_instance(Texture_Rotate).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
+                    ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -44,19 +46,10 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
             let world_transform = Mat4.identity();
-            world_transform = world_transform.times(Mat4.scale([100, 10, 100]));
-            
-<<<<<<< HEAD
-            this.shapes.ground.draw(graphics_state, world_transform, this.materials.test);
+            world_transform = world_transform.times(Mat4.scale([50, 10, 50]));
 
-            /*if(this.attached != undefined)
-            {
-                let desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5])));
-                graphics_state.camera_transform = desired.map((x,i) => Vec.from(graphics_state.camera_transform[i]).mix(x,.1));
-            }*/
-=======
             this.shapes.ground.draw(graphics_state, world_transform, this.materials.ground);
->>>>>>> ground texture kinda
+
         }
     };
 
