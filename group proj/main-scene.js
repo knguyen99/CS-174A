@@ -15,6 +15,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             context.globals.graphics_state.projection_transform = Mat4.perspective(Math.PI / 4, r, .1, 1000);
 
             const shapes = {
+                ground: new Square(),
                 torus: new Torus(15, 15),
                 torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
             };
@@ -42,6 +43,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
         display(graphics_state) {
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
-                                                                                                                                                                                                                                                                                                                                                                                                            
+            let world_transform = Mat4.identity();
+            world_transform = world_transform.times(Mat4.scale([500, 1, 500]));
+            
+            this.shapes.ground.draw(graphics_state, world_transform, this.materials.test);
         }
     };
