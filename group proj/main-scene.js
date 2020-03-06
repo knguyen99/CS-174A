@@ -44,7 +44,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
             let world_transform = Mat4.identity();
-            world_transform = world_transform.times(Mat4.scale([500, 10, 500]));
+            world_transform = world_transform.times(Mat4.scale([100, 10, 100]));
             
 <<<<<<< HEAD
             this.shapes.ground.draw(graphics_state, world_transform, this.materials.test);
