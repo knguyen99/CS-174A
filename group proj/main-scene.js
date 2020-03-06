@@ -8,25 +8,25 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (!context.globals.has_controls)
                 context.register_scene_component(new Movement_Controls(context, control_box.parentElement.insertCell()));
 
-            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, -50, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1));
+            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 50, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1));
             this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
 
             const r = context.width / context.height;
             context.globals.graphics_state.projection_transform = Mat4.perspective(Math.PI / 4, r, .1, 1000);
 
             const shapes = {
-                ground: new Square(),
-                torus: new Torus(15, 15),
-                torus2: new (Torus.prototype.make_flat_shaded_version())(15, 15),
+                square: new Square(),
+                cube: new Cube(),
             };
 
-            shapes.ground.texture_coords = shapes.ground.texture_coords.map( x => x.times(4) );
+            shapes.square.texture_coords = shapes.square.texture_coords.map( x => x.times(4) );
             this.submit_shapes(context, shapes);
 
             // Make some Material objects available to you:
             this.materials =
                 {
                     test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .2}),
+                    building: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: 1}),
                     ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                 };
 
@@ -40,15 +40,29 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.key_triggered_button("Follow Cop Car", ["1"], () => this.attached = () => this.cop_cam);
             this.key_triggered_button("Follow Bad Car", ["2"], () => this.attached = () => this.bad_cam);
             this.new_line();
+            this.key_triggered_button("Temporary Camera", ["3"], () => this.attached = () => this.temp_camera);
         }
 
         display(graphics_state) {
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+
             let world_transform = Mat4.identity();
             world_transform = world_transform.times(Mat4.scale([50, 10, 50]));
 
-            this.shapes.ground.draw(graphics_state, world_transform, this.materials.ground);
+            let building1_transform = Mat4.identity();
+            building1_transform = building1_transform.times(Mat4.scale([5,10,5]));
+            building1_transform = building1_transform.times(Mat4.translation([0,1,0]));
+            building1_transform = building1_transform.times(Mat4.translation([4,0,-4]));
+
+            let building2_transform = Mat4.identity();
+            building2_transform = building2_transform.times(Mat4.scale([4,10,8]));
+            building2_transform = building2_transform.times(Mat4.translation([-3,1,2]));
+            
+            this.shapes.cube.draw(graphics_state,building1_transform,this.materials.building);
+            this.shapes.cube.draw(graphics_state,building2_transform,this.materials.building);
+            this.shapes.square.draw(graphics_state, world_transform, this.materials.ground);
+
 
         }
     };
