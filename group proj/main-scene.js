@@ -26,7 +26,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.materials =
                 {
                     test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .2}),
-                    building: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: 1}),
+                    building: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building.jpg",false)}),
+                    //building2: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building2.jpg",false)}),
                     ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                     road: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/asphalt.jpg", false)})
                 };
@@ -48,15 +49,16 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
 
-
+            //building 1
             let building1_transform = Mat4.identity();
-            building1_transform = building1_transform.times(Mat4.scale([5,10,5]));
-            building1_transform = building1_transform.times(Mat4.translation([0,1,0]));
-            building1_transform = building1_transform.times(Mat4.translation([4,0,-4]));
+            building1_transform = building1_transform.times(Mat4.scale([10,5,11]));
+            building1_transform = building1_transform.times(Mat4.translation([2.2,1,-.6]));
 
+
+            //building 2
             let building2_transform = Mat4.identity();
-            building2_transform = building2_transform.times(Mat4.scale([4,10,8]));
-            building2_transform = building2_transform.times(Mat4.translation([-3,1,2]));
+            building2_transform = building2_transform.times(Mat4.scale([10,11,7]));
+            building2_transform = building2_transform.times(Mat4.translation([-2.2,1,1.6]));
             
             this.shapes.cube.draw(graphics_state,building1_transform,this.materials.building);
             this.shapes.cube.draw(graphics_state,building2_transform,this.materials.building);
