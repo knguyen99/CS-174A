@@ -25,7 +25,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.materials =
                 {
                     test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .2}),
-                    
+                    ground: context.get_instance(Texture_Rotate).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -46,6 +46,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             let world_transform = Mat4.identity();
             world_transform = world_transform.times(Mat4.scale([500, 10, 500]));
             
+<<<<<<< HEAD
             this.shapes.ground.draw(graphics_state, world_transform, this.materials.test);
 
             /*if(this.attached != undefined)
@@ -53,6 +54,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 let desired = Mat4.inverse(this.attached().times(Mat4.translation([0,0,5])));
                 graphics_state.camera_transform = desired.map((x,i) => Vec.from(graphics_state.camera_transform[i]).mix(x,.1));
             }*/
+=======
+            this.shapes.ground.draw(graphics_state, world_transform, this.materials.ground);
+>>>>>>> ground texture kinda
         }
     };
 
