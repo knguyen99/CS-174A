@@ -48,8 +48,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
 
-            let world_transform = Mat4.identity();
-            world_transform = world_transform.times(Mat4.scale([50, 10, 50]));
 
             let building1_transform = Mat4.identity();
             building1_transform = building1_transform.times(Mat4.scale([5,10,5]));
@@ -62,7 +60,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             
             this.shapes.cube.draw(graphics_state,building1_transform,this.materials.building);
             this.shapes.cube.draw(graphics_state,building2_transform,this.materials.building);
-            this.shapes.square.draw(graphics_state, world_transform, this.materials.ground);
 
             // Ground
             let world_transform = Mat4.identity();
