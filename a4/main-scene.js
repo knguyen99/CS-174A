@@ -17,30 +17,44 @@ class Assignment_Four_Scene extends Scene_Component
                          box_2: new Cube(),
                          axis:  new Axis_Arrows()
                        }
+        shapes.box_2.texture_coords = shapes.box_2.texture_coords.map( x => x.times(2) );
         this.submit_shapes( context, shapes );
 
         // TODO:  Create the materials required to texture both cubes with the correct images and settings.
         //        Make each Material from the correct shader.  Phong_Shader will work initially, but when 
         //        you get to requirements 6 and 7 you will need different ones.
         this.materials =
-          { phong: context.get_instance( Phong_Shader ).material( Color.of( 1,1,0,1 ) )
+          { phong: context.get_instance( Phong_Shader ).material( Color.of( 1,1,0,1 ) ),
+            pain: context.get_instance(Texture_Rotate).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/pain.jpeg", false)}),
+            glitch: context.get_instance(Texture_Scroll_X).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/glitch.jpeg", true)})
           }
 
         this.lights = [ new Light( Vec.of( -5,5,5,1 ), Color.of( 0,1,1,1 ), 100000 ) ];
 
         // TODO:  Create any variables that needs to be remembered from frame to frame, such as for incremental movements over time.
-
+        this.box1_transform = Mat4.identity().times(Mat4.translation([-2,0,0]));
+        this.box2_transform = Mat4.identity().times(Mat4.translation([2,0,0]));
+        this.rotate_flag = false;
       }
     make_control_panel()
       { // TODO:  Implement requirement #5 using a key_triggered_button that responds to the 'c' key.
-        
+        this.key_triggered_button("Start/Stop Rotate", ["c"], () => this.rotate_flag = !this.rotate_flag);
       }
     display( graphics_state )
       { graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
         const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
 
         // TODO:  Draw the required boxes. Also update their stored matrices.
-        this.shapes.axis.draw( graphics_state, Mat4.identity(), this.materials.phong );
+        //this.shapes.axis.draw( graphics_state, Mat4.identity(), this.materials.phong );
+        if(this.rotate_flag)
+        {
+            this.box1_transform = this.box1_transform.times(Mat4.rotation(Math.PI*dt, Vec.of(1,0,0)));
+            this.box2_transform = this.box2_transform.times(Mat4.rotation(Math.PI*dt/1.5, Vec.of(0,1,0)));
+        }
+
+
+        this.shapes.box.draw(graphics_state, this.box1_transform, this.materials.pain);
+        this.shapes.box_2.draw(graphics_state, this.box2_transform, this.materials.glitch);
       }
   }
 
