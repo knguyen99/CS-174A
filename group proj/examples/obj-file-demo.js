@@ -105,16 +105,16 @@ export class Obj_File_Demo extends Scene
     constructor()                               
       { super();
                                       // Load the model file:
-        this.shapes = { "teapot": new Shape_From_File( "assets/teapot.obj" ) };
+        this.shapes = { "teapot": new Shape_From_File( "assets/2003eclipse.obj" ) };
 
                                       // Don't create any DOM elements to control this scene:
         this.widget_options = { make_controls: false };
                                                           // Non bump mapped:
         this.stars = new Material( new defs.Textured_Phong( 1 ),  { color: color( .5,.5,.5,1 ), 
-          ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture( "assets/stars.png" ) });
+          ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture( "stars.png" ) });
                                                            // Bump mapped:
         this.bumps = new Material( new defs.Fake_Bump_Map( 1 ), { color: color( .5,.5,.5,1 ), 
-          ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture( "assets/stars.png" ) });
+          ambient: .3, diffusivity: .5, specularity: .5, texture: new Texture( "stars.png" ) });
       }
     display( context, program_state )
       { const t = program_state.animation_time;
