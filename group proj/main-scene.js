@@ -8,8 +8,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (!context.globals.has_controls)
                 context.register_scene_component(new Movement_Controls(context, control_box.parentElement.insertCell()));
 
-            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(10, 25, 10), Vec.of(0, 5, 0), Vec.of(0, 1, 0));
-            this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
+            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 20, -20), Vec.of(0, 5, 0), Vec.of(0, 1, 0));
+            this.initial_camera_location = context.globals.graphics_state.camera_transform;
 
             const r = context.width / context.height;
             context.globals.graphics_state.projection_transform = Mat4.perspective(Math.PI / 4, r, .1, 1000);
@@ -45,6 +45,10 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
+
+            this.cop_x = 0;
+            this.cop_y = 1;
+            this.cop_z = 0;
         }
 
         make_control_panel() {
@@ -109,7 +113,14 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             // Cop Car
             let cop_car = Mat4.identity().times(Mat4.translation([0,1,t]));
+            this.cop_z = t;
+            this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
+
             this.drawCopCar(graphics_state, cop_car, t);
+
+            if (this.attached != null) {
+                graphics_state.camera_transform = this.attached();
+            }
         }
 
         drawCopCar(graphics_state, initial_position, t) {
