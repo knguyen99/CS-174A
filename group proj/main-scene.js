@@ -18,7 +18,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 square: new Square(),
                 cube: new Cube(),
                 car: new Shape_From_File( "assets/Small car.obj" ),
-                teapot: new Shape_From_File( "assets/teapot.obj" )
+                teapot: new Shape_From_File( "assets/teapot.obj" ),
+                cop: new Shape_From_File("assets/cop.obj")
             };
 
             shapes.square.texture_coords = shapes.square.texture_coords.map( x => x.times(4) );
@@ -33,7 +34,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                     ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                     road: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/asphalt.jpg", false)}),
                     teapot: context.get_instance(Phong_Shader).material(Color.of( .5,.5,.5,1 ), { ambient: .3, diffusivity: .5, specularity: .5, texture: context.get_instance("assets/stars.png", false) }),
-                    car: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/carbodyD.png")})
+                    car: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/carbodyD.png")}),
+                    cop: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/cop.png")}),
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -93,8 +95,15 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             this.shapes.cube.draw(graphics_state, road_transform, this.materials.road);
 
+            // Bad Car
+
             let car_transform = Mat4.identity();
             car_transform = car_transform.times(Mat4.translation([0, 5, 0]));
             this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
+
+            // Cop Car
+            let cop_transform = Mat4.identity();
+            cop_transform = cop_transform.times(Mat4.translation([5, 5, 5]));
+            this.shapes.cop.draw(graphics_state, cop_transform, this.materials.cop);
         }
     };
