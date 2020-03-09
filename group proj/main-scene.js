@@ -27,6 +27,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.submit_shapes(context, shapes);
             this.copRed = Color.of(.89,.09,.05,0.8);
             this.copBlue = Color.of(0,.24,1,0.8);
+            this.copBlack = Color.of(.2,.2,.2,1);
+            this.copWhite = Color.of(1,1,1,1);
             // Make some Material objects available to you:
             this.materials =
                 {
@@ -49,16 +51,25 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.cop_x = 0;
             this.cop_y = 1;
             this.cop_z = 0;
+
+            this.move = false;
+            this.move_direction = 1;
+            this.turn_right = false;
+            this.turn_left = false;
+            this.cop_car_rotation = 0;
         }
 
         make_control_panel() {
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-            this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => this.initial_camera_location);
-            this.new_line();
+            this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => null);
             this.key_triggered_button("Follow Cop Car", ["1"], () => this.attached = () => this.cop_cam);
             this.key_triggered_button("Follow Bad Car", ["2"], () => this.attached = () => this.bad_cam);
-            this.new_line();
             this.key_triggered_button("Temporary Camera", ["3"], () => this.attached = () => this.temp_camera);
+            this.new_line();
+            this.key_triggered_button("Move forward", ["i"], () => this.move = true, undefined, () => this.move = false);
+            this.key_triggered_button("Move backward", ["k"], () => {this.move = true; this.move_direction = -1;}, undefined, () => {this.move = false; this.move_direction = 1});
+            this.key_triggered_button("Turn left", ["j"], () => this.turn_left = true, undefined, () => this.turn_left = false);
+            this.key_triggered_button("Turn right", ["l"], () => this.turn_right = true, undefined, () => this.turn_right = false);
         }
 
         display(graphics_state) {
@@ -106,17 +117,24 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.shapes.cube.draw(graphics_state, road_transform, this.materials.road);
 
             // Bad Car
-
             let car_transform = Mat4.identity();
             car_transform = car_transform.times(Mat4.translation([0, 2.5, 0])).times(Mat4.scale([4, 4, 4]));
             //this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
 
             // Cop Car
-            let cop_car = Mat4.identity().times(Mat4.translation([0,1,t]));
-            this.cop_z = t;
+            var cop_velocity;
+            if (this.move) {
+                cop_velocity = 5*this.move_direction*dt;
+                this.cop_z += cop_velocity;
+            }
+            else {
+                cop_velocity = 0;
+            }
+
+            let cop_car = Mat4.identity().times(Mat4.translation([0,1,this.cop_z]));
             this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
 
-            this.drawCopCar(graphics_state, cop_car, t);
+            this.drawCopCar(graphics_state, cop_car, cop_velocity);            
 
             if (this.attached != null) {
                 graphics_state.camera_transform = this.attached();
@@ -129,7 +147,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             cop_body = cop_body.times(Mat4.translation([0, 2, 0]))
                                .times(Mat4.scale([2, 1, 5]));
             
-            this.shapes.cube.draw(graphics_state, initial_position.times(cop_body), this.materials.copBody);
+            this.shapes.cube.draw(graphics_state, initial_position.times(cop_body), this.materials.copBody.override({color: this.copBlack}));
             cop_body = cop_body.times(Mat4.translation([0, 1, 0]))
                                .times(Mat4.scale([1, 2, 0.5]));
 
@@ -178,10 +196,14 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             // Wheels
             let wheel = Mat4.identity();
+
+            // Front Wheels
             wheel = wheel.times(Mat4.translation([2,1,2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
-                         .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+                         .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
+
+            if (this.move)
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
 
@@ -191,13 +213,20 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
                          .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
 
+            if (this.move)
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
+
             this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
 
+            // Back Wheels
             wheel = Mat4.identity();
             wheel = wheel.times(Mat4.translation([-2,1,-2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
                          .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+
+            if (this.move)
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
 
@@ -206,6 +235,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
                          .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+
+            if (this.move)
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
         }
