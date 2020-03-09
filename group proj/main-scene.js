@@ -46,6 +46,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
 
+            //this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
+            this.cop_car = Mat4.identity();
             this.cop_x = 0;
             this.cop_y = 1;
             this.cop_z = 0;
@@ -54,7 +56,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.move_direction = 1;
             this.cop_front_rotation = 0;
             this.turn_left = false;
-            this.turn_right = false;
+            this.turn_right = false;  
         }
 
         make_control_panel() {
@@ -123,26 +125,29 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             var cop_velocity;
             const max_turning_angle = 65*Math.PI/180;
 
+            if (this.turn_left) {
+                if (this.cop_front_rotation < max_turning_angle)
+                    this.cop_front_rotation += Math.PI*dt/4;
+            }
+            else if (this.turn_right) {
+                if (this.cop_front_rotation > -max_turning_angle)
+                    this.cop_front_rotation -= Math.PI*dt/4;
+            }
+
+            let cop_car = Mat4.identity().times(Mat4.translation([this.cop_x, 1, this.cop_z]));
+            let cop_header = Vec.of(this.cop_x, this.cop_y, this.cop_z);
             if (this.move) {
-                if (this.turn_left) {
-                    if (this.cop_front_rotation < max_turning_angle)
-                        this.cop_front_rotation += Math.PI*dt/4;
-                }
-                else if (this.turn_right) {
-                    if (this.cop_front_rotation > -max_turning_angle)
-                        this.cop_front_rotation -= Math.PI*dt/4;
-                }
                 cop_velocity = 5*this.move_direction*dt;
-                this.cop_z += cop_velocity;
+                this.cop_x += cop_velocity*Math.asin(this.cop_front_rotation);
+                this.cop_z += cop_velocity*Math.acos(this.cop_front_rotation);
             }
             else {
                 cop_velocity = 0;
             }
+            cop_car = cop_car.times(Mat4.rotation(this.cop_front_rotation, Vec.of(0,1,0)));
 
-            let cop_car = Mat4.identity().times(Mat4.translation([0,1,this.cop_z]))
-                                         .times(Mat4.rotation(this.cop_front_rotation, Vec.of(0,1,0)));
-
-            this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
+            // Recalculate Cop Camera Coords
+            this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), cop_header, Vec.of(0,1,0));
 
             this.drawCopCar(graphics_state, cop_car, cop_velocity);            
 
@@ -151,7 +156,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             }
         }
 
-        drawCopCar(graphics_state, initial_position, t) {
+        drawCopCar(graphics_state, initial_position, v) {
             // Car Body
             let cop_body = initial_position;
             cop_body = cop_body.times(Mat4.translation([0, 2, 0]))
@@ -223,7 +228,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)));
 
             if (this.move)
-                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*v/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, wheel.times(front_wheel_rotation), this.materials.rubber);
 
@@ -231,10 +236,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             wheel = wheel.times(Mat4.translation([-2,1,2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
 
             if (this.move)
-                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*v/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, wheel.times(front_wheel_rotation), this.materials.rubber);
 
@@ -243,10 +247,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             wheel = wheel.times(Mat4.translation([-2,1,-2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
 
             if (this.move)
-                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*v/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, wheel, this.materials.rubber);
 
@@ -254,10 +257,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             wheel = wheel.times(Mat4.translation([2,1,-2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
-                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
 
             if (this.move)
-                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
+                wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*v/4, Vec.of(0,0,1)));
 
             this.shapes.torus.draw(graphics_state, wheel, this.materials.rubber);
         }
