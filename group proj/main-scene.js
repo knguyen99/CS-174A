@@ -153,15 +153,24 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
         drawCopCar(graphics_state, initial_position, t) {
             // Car Body
-            let cop_body = Mat4.identity();
+            let cop_body = initial_position;
             cop_body = cop_body.times(Mat4.translation([0, 2, 0]))
                                .times(Mat4.scale([2, 1, 5]));
-            
-            this.shapes.cube.draw(graphics_state, initial_position.times(cop_body), this.materials.copBody.override({color: this.copBlack}));
+
+            let cop_front = cop_body;
+            cop_front = cop_body.times(Mat4.translation([0, 0, 0.75]))
+                                .times(Mat4.scale([1, 1, 0.25]));
+            this.shapes.cube.draw(graphics_state, cop_front, this.materials.copBody.override({color: this.copBlack}));
+
+            let cop_back = cop_body;
+            cop_back = cop_body.times(Mat4.translation([0, 0, -0.75]))
+                                .times(Mat4.scale([1, 1, 0.25]));
+            this.shapes.cube.draw(graphics_state, cop_back, this.materials.copBody.override({color: this.copBlack}));
+
             cop_body = cop_body.times(Mat4.translation([0, 1, 0]))
                                .times(Mat4.scale([1, 2, 0.5]));
 
-            this.shapes.cube.draw(graphics_state, initial_position.times(cop_body), this.materials.copBody);
+            this.shapes.cube.draw(graphics_state, cop_body, this.materials.copBody);
 
             // Windows
             // Front/Back Windshield
@@ -169,43 +178,43 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             window_transform = window_transform.times(Mat4.translation([0,0.5,0.95]))
                                                .times(Mat4.scale([0.9,0.4,0.1]));
 
-            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            this.shapes.cube.draw(graphics_state, window_transform, this.materials.glass);
             
             window_transform = window_transform.times(Mat4.translation([0,0,-19]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            this.shapes.cube.draw(graphics_state, window_transform, this.materials.glass);
 
             // Side Windows
             window_transform = cop_body;
             window_transform = window_transform.times(Mat4.translation([0.95, 0.5, 0.5]))
                                                .times(Mat4.scale([0.1, 0.4, 0.4]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            this.shapes.cube.draw(graphics_state, window_transform, this.materials.glass);
             window_transform = window_transform.times(Mat4.translation([0, 0, -2.5]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            this.shapes.cube.draw(graphics_state, window_transform, this.materials.glass);
 
             window_transform = cop_body;
             window_transform = window_transform.times(Mat4.translation([-0.95, 0.5, 0.5]))
                                                .times(Mat4.scale([0.1, 0.4, 0.4]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            this.shapes.cube.draw(graphics_state, window_transform, this.materials.glass);
             window_transform = window_transform.times(Mat4.translation([0, 0, -2.5]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            this.shapes.cube.draw(graphics_state, window_transform, this.materials.glass);
 
             // Top Part of Cop Car
-            let cop_top = Mat4.identity();
+            let cop_top = initial_position;
             cop_top = cop_top.times(Mat4.translation([0,5,0]));
 
             let cop_red_light = cop_top.times(Mat4.scale([.8,0.25,.75]))
                                        .times(Mat4.translation([1.2,.8,0]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(cop_red_light), this.materials.copLight.override({color: this.copRed}));
+            this.shapes.cube.draw(graphics_state, cop_red_light, this.materials.copLight.override({color: this.copRed}));
 
             let cop_blue_light = cop_top.times(Mat4.scale([.8,0.25,.75]))
                                        .times(Mat4.translation([-1.2,.8,0]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(cop_blue_light), this.materials.copLight.override({color: this.copBlue}));
+            this.shapes.cube.draw(graphics_state, cop_blue_light, this.materials.copLight.override({color: this.copBlue}));
 
             cop_top = cop_top.times(Mat4.scale([0.2, .8, 1]));
-            this.shapes.cube.draw(graphics_state, initial_position.times(cop_top), this.materials.copTop);
+            this.shapes.cube.draw(graphics_state, cop_top, this.materials.copTop);
 
             // Wheels
-            let wheel = Mat4.identity();
+            let wheel = initial_position;
             let front_wheel_rotation = Mat4.identity().times(Mat4.rotation(this.cop_front_rotation, Vec.of(0,1,0)));
 
             // Front Wheels
@@ -216,9 +225,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (this.move)
                 wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
-            this.shapes.torus.draw(graphics_state, initial_position.times(wheel).times(front_wheel_rotation), this.materials.rubber);
+            this.shapes.torus.draw(graphics_state, wheel.times(front_wheel_rotation), this.materials.rubber);
 
-            wheel = Mat4.identity();
+            wheel = initial_position;
             wheel = wheel.times(Mat4.translation([-2,1,2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
@@ -227,10 +236,10 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (this.move)
                 wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
-            this.shapes.torus.draw(graphics_state, initial_position.times(wheel).times(front_wheel_rotation), this.materials.rubber);
+            this.shapes.torus.draw(graphics_state, wheel.times(front_wheel_rotation), this.materials.rubber);
 
             // Back Wheels
-            wheel = Mat4.identity();
+            wheel = initial_position;
             wheel = wheel.times(Mat4.translation([-2,1,-2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
@@ -239,9 +248,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (this.move)
                 wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
-            this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
+            this.shapes.torus.draw(graphics_state, wheel, this.materials.rubber);
 
-            wheel = Mat4.identity();
+            wheel = initial_position;
             wheel = wheel.times(Mat4.translation([2,1,-2]))
                          .times(Mat4.scale([0.4,0.4,0.4]))
                          .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
@@ -250,6 +259,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (this.move)
                 wheel = wheel.times(Mat4.rotation(this.move_direction*Math.PI*t/4, Vec.of(0,0,1)));
 
-            this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
+            this.shapes.torus.draw(graphics_state, wheel, this.materials.rubber);
         }
     };
