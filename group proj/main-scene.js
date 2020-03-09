@@ -8,7 +8,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             if (!context.globals.has_controls)
                 context.register_scene_component(new Movement_Controls(context, control_box.parentElement.insertCell()));
 
-            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(0, 50, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1));
+            context.globals.graphics_state.camera_transform = Mat4.look_at(Vec.of(10, 25, 10), Vec.of(0, 5, 0), Vec.of(0, 1, 0));
             this.initial_camera_location = Mat4.inverse(context.globals.graphics_state.camera_transform);
 
             const r = context.width / context.height;
@@ -17,6 +17,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             const shapes = {
                 square: new Square(),
                 cube: new Cube(),
+                torus: new Torus(15, 15),
                 car: new Shape_From_File( "assets/Small car.obj" ),
                 teapot: new Shape_From_File( "assets/teapot.obj" ),
                 cop: new Shape_From_File("assets/cop.obj")
@@ -24,7 +25,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             shapes.square.texture_coords = shapes.square.texture_coords.map( x => x.times(4) );
             this.submit_shapes(context, shapes);
-
+            this.copRed = Color.of(.89,.09,.05,0.8);
+            this.copBlue = Color.of(0,.24,1,0.8);
             // Make some Material objects available to you:
             this.materials =
                 {
@@ -35,7 +37,11 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                     road: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/asphalt.jpg", false)}),
                     teapot: context.get_instance(Phong_Shader).material(Color.of( .5,.5,.5,1 ), { ambient: .3, diffusivity: .5, specularity: .5, texture: context.get_instance("assets/stars.png", false) }),
                     car: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/carbodyD.png")}),
-                    cop: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/cop.png")}),
+                    copBody: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: .7}),
+                    copTop: context.get_instance(Phong_Shader).material(Color.of(.2,.2,.2,1), {ambient: 1}),
+                    copLight: context.get_instance(Phong_Shader).material(Color.of(.89,.09,.05,1), {ambient: 1}),
+                    glass: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/glass.png")}),
+                    rubber: context.get_instance(Phong_Shader).material(Color.of(.1,.1,.1,1), {ambient: .9})
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -98,12 +104,98 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             // Bad Car
 
             let car_transform = Mat4.identity();
-            car_transform = car_transform.times(Mat4.translation([0, 5, 0]));
-            this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
+            car_transform = car_transform.times(Mat4.translation([0, 2.5, 0])).times(Mat4.scale([4, 4, 4]));
+            //this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
 
             // Cop Car
-            let cop_transform = Mat4.identity();
-            cop_transform = cop_transform.times(Mat4.translation([5, 5, 5]));
-            this.shapes.cop.draw(graphics_state, cop_transform, this.materials.cop);
+            let cop_car = Mat4.identity().times(Mat4.translation([0,1,t]));
+            this.drawCopCar(graphics_state, cop_car, t);
+        }
+
+        drawCopCar(graphics_state, initial_position, t) {
+            // Car Body
+            let cop_body = Mat4.identity();
+            cop_body = cop_body.times(Mat4.translation([0, 2, 0]))
+                               .times(Mat4.scale([2, 1, 5]));
+            
+            this.shapes.cube.draw(graphics_state, initial_position.times(cop_body), this.materials.copBody);
+            cop_body = cop_body.times(Mat4.translation([0, 1, 0]))
+                               .times(Mat4.scale([1, 2, 0.5]));
+
+            this.shapes.cube.draw(graphics_state, initial_position.times(cop_body), this.materials.copBody);
+
+            // Windows
+            // Front/Back Windshield
+            let window_transform = cop_body;
+            window_transform = window_transform.times(Mat4.translation([0,0.5,0.95]))
+                                               .times(Mat4.scale([0.9,0.4,0.1]));
+
+            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            
+            window_transform = window_transform.times(Mat4.translation([0,0,-19]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+
+            // Side Windows
+            window_transform = cop_body;
+            window_transform = window_transform.times(Mat4.translation([0.95, 0.5, 0.5]))
+                                               .times(Mat4.scale([0.1, 0.4, 0.4]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            window_transform = window_transform.times(Mat4.translation([0, 0, -2.5]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+
+            window_transform = cop_body;
+            window_transform = window_transform.times(Mat4.translation([-0.95, 0.5, 0.5]))
+                                               .times(Mat4.scale([0.1, 0.4, 0.4]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+            window_transform = window_transform.times(Mat4.translation([0, 0, -2.5]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(window_transform), this.materials.glass);
+
+            // Top Part of Cop Car
+            let cop_top = Mat4.identity();
+            cop_top = cop_top.times(Mat4.translation([0,5,0]));
+
+            let cop_red_light = cop_top.times(Mat4.scale([.8,0.25,.75]))
+                                       .times(Mat4.translation([1.2,.8,0]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(cop_red_light), this.materials.copLight.override({color: this.copRed}));
+
+            let cop_blue_light = cop_top.times(Mat4.scale([.8,0.25,.75]))
+                                       .times(Mat4.translation([-1.2,.8,0]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(cop_blue_light), this.materials.copLight.override({color: this.copBlue}));
+
+            cop_top = cop_top.times(Mat4.scale([0.2, .8, 1]));
+            this.shapes.cube.draw(graphics_state, initial_position.times(cop_top), this.materials.copTop);
+
+            // Wheels
+            let wheel = Mat4.identity();
+            wheel = wheel.times(Mat4.translation([2,1,2]))
+                         .times(Mat4.scale([0.4,0.4,0.4]))
+                         .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
+                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+
+            this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
+
+            wheel = Mat4.identity();
+            wheel = wheel.times(Mat4.translation([-2,1,2]))
+                         .times(Mat4.scale([0.4,0.4,0.4]))
+                         .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
+                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+
+            this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
+
+            wheel = Mat4.identity();
+            wheel = wheel.times(Mat4.translation([-2,1,-2]))
+                         .times(Mat4.scale([0.4,0.4,0.4]))
+                         .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
+                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+
+            this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
+
+            wheel = Mat4.identity();
+            wheel = wheel.times(Mat4.translation([2,1,-2]))
+                         .times(Mat4.scale([0.4,0.4,0.4]))
+                         .times(Mat4.rotation(Math.PI/2, Vec.of(0,1,0)))
+                         .times(Mat4.rotation(Math.PI*t/4, Vec.of(0,0,1)));
+
+            this.shapes.torus.draw(graphics_state, initial_position.times(wheel), this.materials.rubber);
         }
     };
