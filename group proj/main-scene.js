@@ -19,6 +19,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 cube: new Cube(),
                 torus: new Torus(15, 15),
                 car: new Shape_From_File( "assets/Small car.obj" ),
+                sphere: new Subdivision_Sphere(4)
             };
 
             shapes.square.texture_coords = shapes.square.texture_coords.map( x => x.times(4) );
@@ -30,7 +31,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             // Make some Material objects available to you:
             this.materials =
                 {
-                    test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .2}),
+                    test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .7}),
                     building: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building.jpg",false)}),
                     //building2: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building2.jpg",false)}),
                     ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
@@ -41,10 +42,15 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                     copTop: context.get_instance(Phong_Shader).material(Color.of(.2,.2,.2,1), {ambient: 1}),
                     copLight: context.get_instance(Phong_Shader).material(Color.of(.89,.09,.05,1), {ambient: 1}),
                     glass: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/glass.png")}),
-                    rubber: context.get_instance(Phong_Shader).material(Color.of(.1,.1,.1,1), {ambient: .9})
+                    rubber: context.get_instance(Phong_Shader).material(Color.of(.1,.1,.1,1), {ambient: .9}),
+                      
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
+
+            //general controls
+            this.restart = false;
+            this.pause = false;
 
             //this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
             this.cop_car = Mat4.identity();
@@ -57,24 +63,33 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.cop_front_rotation = 0;
             this.turn_left = false;
             this.turn_right = false;  
+            
+            this.human_pos = [[3,37],[-4,18],[-26,-30],[23,27],[16,-36]]; //[x,z]
+            this.aliveHumans = [true, true, true, true, true];
+            this.ready = false;
         }
 
         make_control_panel() {
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-            this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => null);
+            this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => Mat4.look_at(Vec.of(0, 100, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1)));
             this.key_triggered_button("Follow Cop Car", ["1"], () => this.attached = () => this.cop_cam);
             this.key_triggered_button("Follow Bad Car", ["2"], () => this.attached = () => this.bad_cam);
-            this.key_triggered_button("Temporary Camera", ["3"], () => this.attached = () => this.temp_camera);
             this.new_line();
             this.key_triggered_button("Move forward", ["i"], () => this.move = true, undefined, () => this.move = false);
             this.key_triggered_button("Move backward", ["k"], () => {this.move = true; this.move_direction = -1;}, undefined, () => {this.move = false; this.move_direction = 1});
+            this.new_line();
             this.key_triggered_button("Turn left", ["j"], () => this.turn_left = true, undefined, () => this.turn_left = false);
             this.key_triggered_button("Turn right", ["l"], () => this.turn_right = true, undefined, () => this.turn_right = false);
+            this.new_line();
+            this.key_triggered_button("Restart", ["r"], () => this.restart = () => true);
+            this.key_triggered_button("Pause", ["p"], () => this.pause = () => !this.pause);
+
         }
 
         display(graphics_state) {
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
-            const t = graphics_state.animation_time / 1000, dt = graphics_state.animation_delta_time / 1000;
+            const t = graphics_state.animation_time/1000, dt = graphics_state.animation_delta_time / 1000;
+
 
             //building 1
             let building1_transform = Mat4.identity();
@@ -94,6 +109,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             let world_transform = Mat4.identity();
             world_transform = world_transform.times(Mat4.scale([50, 10, 50]));
             this.shapes.square.draw(graphics_state, world_transform, this.materials.ground);
+
 
             // Roads
             let road_transform = Mat4.identity();
@@ -116,10 +132,48 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             this.shapes.cube.draw(graphics_state, road_transform, this.materials.road);
 
-            // Bad Car
-            let car_transform = Mat4.identity();
-            car_transform = car_transform.times(Mat4.translation([0, 2.5, 0])).times(Mat4.scale([4, 4, 4]));
-            //this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
+//             // Bad Car
+//             let car_transform = Mat4.identity();
+//             car_transform = car_transform.times(Mat4.translation([0, 2.5, 0])).times(Mat4.scale([4, 4, 4]));
+//             //this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
+
+            let human_transform = Mat4.identity();
+
+            if(!this.pause && Math.floor(t)%2 == 0 && this.ready == false)
+            {
+
+                let new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0]];;
+                for(var i = 0; i < 5; i += 1)
+                {
+                        new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
+                        new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;
+                        while(new_transform[i][0] >= 45 || new_transform[i][0] <= -45 || new_transform[i][1] >= 45 || new_transform[i][1] <= -45 || //ground boundaries
+                                (( new_transform[i][0] <= 34 && new_transform[i][0] >= 10) && (new_transform[i][1] <= 6.4 && new_transform[i][1] >= -19.6)) || //building 1
+                                (( new_transform[i][0] <= -10 && new_transform[i][0] >= -34) && (new_transform[i][1] <= 20.2 && new_transform[i][1] >= 2.2)))// ||//building 2
+                                //(new_transform.indexOf(new_transform[i]) != new_transform.lastIndexOf(new_transform[i]))) //other people
+                        {
+                                new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
+                                new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;                               
+                        }
+                        this.human_pos[i][0] = new_transform[i][0];
+                        this.human_pos[i][0] = new_transform[i][1];
+                }
+                this.ready = true;
+            }
+            else if(Math.floor(t)%2 != 0)
+            {
+                 this.ready = false;
+            }
+            
+            for(var j = 0; j < 5; j+= 1)
+            {
+                    if(this.aliveHumans[j])
+                    {
+                            human_transform = human_transform.times(Mat4.translation([this.human_pos[j][0],0,this.human_pos[j][1]]));
+                            this.drawHuman(graphics_state,human_transform)
+                    }
+                    human_transform = Mat4.identity();
+            }
 
             // Cop Car
             var cop_velocity;
@@ -153,6 +207,15 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             if (this.attached != null) {
                 graphics_state.camera_transform = this.attached();
+            }
+
+
+            if(this.restart)
+            {
+                this.human_x = [0,0,0,0,0];
+                this.human_z = [0,0,0,0,0];
+                this.aliveHumans = [true, true, true, true, true];
+                this.restart = false;
             }
         }
 
@@ -263,4 +326,43 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             this.shapes.torus.draw(graphics_state, wheel, this.materials.rubber);
         }
+
+        drawHuman(graphics_state, initial_position)
+        {
+                let human_body = initial_position;
+                human_body = human_body.times(Mat4.scale([1,2,.7]));
+                human_body = human_body.times(Mat4.translation([.65,1.6,0])) .times(Mat4.scale([.5,.5,.5]));
+                
+                let head = initial_position;
+                head = head.times(Mat4.translation([0,5,0]))
+                        .times(Mat4.scale([1.3,1.3,1.3]))
+                        .times(Mat4.translation([.5,-.13,0]))
+                        .times(Mat4.scale([.5,.5,.5]));
+
+                let arm1 = initial_position;
+                arm1 = arm1.times(Mat4.scale([.3,1.3,.3]))
+                           .times(Mat4.translation([4.4,2.6,0])) 
+                           .times(Mat4.scale([.5,.5,.5]));
+
+                let arm2 = arm1;
+                arm2 = arm2.times(Mat4.translation([-8.8,0,0]));
+
+                let leg1 = arm1;
+                leg1 = leg1.times(Mat4.translation([-1.9,-2.8,0])).times(Mat4.scale([1,1.2,1]));
+
+                let leg2 = arm2;
+                leg2 = leg2.times(Mat4.translation([1.9,-2.8,0])).times(Mat4.scale([1,1.2,1]));
+
+                this.shapes.cube.draw(graphics_state, human_body, this.materials.test.override({color: Color.of(1,1,1,1)}));
+                this.shapes.sphere.draw(graphics_state, head, this.materials.test);
+
+                
+                this.shapes.cube.draw(graphics_state,arm1, this.materials.test);
+                this.shapes.cube.draw(graphics_state,arm2, this.materials.test);
+                this.shapes.cube.draw(graphics_state,leg1, this.materials.test);
+                this.shapes.cube.draw(graphics_state,leg2, this.materials.test);
+        }
+
+
     };
+
