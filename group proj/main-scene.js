@@ -64,9 +64,11 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.turn_left = false;
             this.turn_right = false;  
             
-            this.human_pos = [[3,37],[-4,18],[-26,-30],[23,27],[16,-36]]; //[x,z]
-            this.aliveHumans = [true, true, true, true, true];
+            this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]]; //[x,z]
+            this.aliveHumans = [true, true, true, true, true, true, true, true, true, true ];
             this.ready = false;
+
+            this.score = 0;
         }
 
         make_control_panel() {
@@ -88,7 +90,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
         display(graphics_state) {
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
-            const t = graphics_state.animation_time/1000, dt = graphics_state.animation_delta_time / 1000;
+            const t = graphics_state.animation_time/100, dt = graphics_state.animation_delta_time / 1000;
 
 
             //building 1
@@ -139,33 +141,38 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             let human_transform = Mat4.identity();
 
-            if(!this.pause && Math.floor(t)%2 == 0 && this.ready == false)
+            if(!this.pause &&  Math.floor(t)%2 == 0 && this.ready == false)
             {
 
-                let new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0]];;
-                for(var i = 0; i < 5; i += 1)
+                let new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];;
+                for(var i = 0; i < 10; i += 1)
                 {
-                        new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
-                        new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;
-                        while(new_transform[i][0] >= 45 || new_transform[i][0] <= -45 || new_transform[i][1] >= 45 || new_transform[i][1] <= -45 || //ground boundaries
-                                (( new_transform[i][0] <= 34 && new_transform[i][0] >= 10) && (new_transform[i][1] <= 6.4 && new_transform[i][1] >= -19.6)) || //building 1
-                                (( new_transform[i][0] <= -10 && new_transform[i][0] >= -34) && (new_transform[i][1] <= 20.2 && new_transform[i][1] >= 2.2)))// ||//building 2
-                                //(new_transform.indexOf(new_transform[i]) != new_transform.lastIndexOf(new_transform[i]))) //other people
-                        {
+                        let x_vals = [new_transform[i][0]+.65,new_transform[i][0]-.65];
+                        let z_vals = [new_transform[i][1]+.35,new_transform[i][1]-.35];
+                        let car_points = [];
+                        if(this.aliveHumans[i]){
                                 new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
-                                new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;                               
+                                new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;
+                                while(new_transform[i][0] >= 45 || new_transform[i][0] <= -45 || new_transform[i][1] >= 45 || new_transform[i][1] <= -45 || //ground boundaries
+                                        (( new_transform[i][0] <= 34 && new_transform[i][0] >= 10) && (new_transform[i][1] <= 6.4 && new_transform[i][1] >= -19.6)) || //building 1
+                                        (( new_transform[i][0] <= -10 && new_transform[i][0] >= -34) && (new_transform[i][1] <= 20.2 && new_transform[i][1] >= 2.2)))// ||//building 2
+                                        //(new_transform.indexOf(new_transform[i]) != new_transform.lastIndexOf(new_transform[i]))) //other people
+                                {
+                                        new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
+                                        new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;                               
+                                }
+                                this.human_pos[i][0] = new_transform[i][0];
+                                this.human_pos[i][1] = new_transform[i][1];
                         }
-                        this.human_pos[i][0] = new_transform[i][0];
-                        this.human_pos[i][0] = new_transform[i][1];
                 }
                 this.ready = true;
             }
-            else if(Math.floor(t)%2 != 0)
+            else if( Math.floor(t)%2 != 0)
             {
                  this.ready = false;
             }
             
-            for(var j = 0; j < 5; j+= 1)
+            for(var j = 0; j < 10; j+= 1)
             {
                     if(this.aliveHumans[j])
                     {
@@ -212,9 +219,8 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             if(this.restart)
             {
-                this.human_x = [0,0,0,0,0];
-                this.human_z = [0,0,0,0,0];
-                this.aliveHumans = [true, true, true, true, true];
+                this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]];
+                this.aliveHumans = [true, true, true, true, true,true, true, true, true, true];
                 this.restart = false;
             }
         }
