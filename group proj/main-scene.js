@@ -42,6 +42,7 @@ window.Final_Project = window.classes.Final_Project =
                     rubber: context.get_instance(Phong_Shader).material(Color.of(.1,.1,.1,1), {ambient: .9}),
                     menu: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/menu.png", true)}),
                     gameover: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/gameover.png", true)}),
+                    win: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/win.png", true)}),
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -86,8 +87,8 @@ window.Final_Project = window.classes.Final_Project =
             this.key_triggered_button("Turn left", ["j"], () => this.turn_left = true, undefined, () => this.turn_left = false);
             this.key_triggered_button("Turn right", ["l"], () => this.turn_right = true, undefined, () => this.turn_right = false);
             this.new_line();
-            this.key_triggered_button("Restart", ["t"], () => this.restart = () => true);
-            this.key_triggered_button("Pause", ["y"], () => this.pause = () => !this.pause);
+            // this.key_triggered_button("Restart", ["t"], () => this.restart = () => true);
+            // this.key_triggered_button("Pause", ["y"], () => this.pause = () => !this.pause);
             this.key_triggered_button("Start Game", ["b"], () => this.playing = () => true);
 
         }
@@ -107,13 +108,24 @@ window.Final_Project = window.classes.Final_Project =
             }
             else if (this.hit_building(this.cop_x, this.cop_z))
             {
-                graphics_state.camera_transform = Mat4.look_at(Vec.of(2007, 2008, 2978), Vec.of(2007, 2008, 2990), Vec.of(0, 1, 0));
+                graphics_state.camera_transform = Mat4.look_at(Vec.of(1007, 1008, 978), Vec.of(1007, 1008, 990), Vec.of(0, 1, 0));
                 var menu_transform = Mat4.identity()
-                                                    .times(Mat4.translation([1999,2000,2990]))
+                                                    .times(Mat4.translation([999,1000,990]))
                                                     .times(Mat4.rotation(Math.PI, Vec.of(0,0,1)))
                                                     .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
                                                     .times(Mat4.scale([32,1,32]))
                 this.shapes.square.draw(graphics_state, menu_transform, this.materials.gameover);
+                return;
+            }
+            else if (this.check_win()) {
+                graphics_state.camera_transform = Mat4.look_at(Vec.of(1007, 1008, 978), Vec.of(1007, 1008, 990), Vec.of(0, 1, 0));
+                var menu_transform = Mat4.identity()
+                                                    .times(Mat4.translation([999,1000,990]))
+                                                    .times(Mat4.rotation(Math.PI, Vec.of(0,0,1)))
+                                                    .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
+                                                    .times(Mat4.scale([32,1,32]));
+                this.shapes.square.draw(graphics_state, menu_transform, this.materials.win);
+                return;
             }
             else { 
                 graphics_state.camera_transform = this.cop_cam.map((x,i) => Vec.from(graphics_state.camera_transform[i]).mix(x,.5));
@@ -162,7 +174,7 @@ window.Final_Project = window.classes.Final_Project =
 
             let human_transform = Mat4.identity();
 
-            if(!this.pause &&  Math.floor(t)%2 == 0 && this.ready == false)
+            if(/*!this.pause &&  */Math.floor(t)%2 == 0 && this.ready == false)
             {
 
                 let new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];;
@@ -252,13 +264,14 @@ window.Final_Project = window.classes.Final_Project =
             }
 
 
-            if(this.restart)
-            {
-                this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]];
-                this.aliveHumans = [true, true, true, true, true,true, true, true, true, true];
-                this.score = 0;
-                this.restart = false;
-            }
+            // if(this.restart)
+            // {
+            //     this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]];
+            //     this.aliveHumans = [true, true, true, true, true,true, true, true, true, true];
+            //     this.score = 0;
+            //     this.restart = false;
+                
+            // }
         }
 
         drawCopCar(graphics_state, initial_position, v) {
@@ -413,6 +426,14 @@ window.Final_Project = window.classes.Final_Project =
                 return true;
             }
             return false;
+        }
+
+        check_win() {
+            for (var i = 0; i < this.aliveHumans.length; i++) {
+                if (this.aliveHumans[i] == true)
+                    return false;
+            }
+            return true;
         }
     };
 
