@@ -32,7 +32,7 @@ window.Final_Project = window.classes.Final_Project =
                 {
                     test: context.get_instance(Phong_Shader).material(Color.of(1, 1, 0, 1), {ambient: .7}),
                     building: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building.jpg",false)}),
-                    //building2: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building2.jpg",false)}),
+                    building2: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building-2.jpg",false)}),
                     ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                     road: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/asphalt.jpg", false)}),
                     copBody: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: .7}),
@@ -42,7 +42,7 @@ window.Final_Project = window.classes.Final_Project =
                     rubber: context.get_instance(Phong_Shader).material(Color.of(.1,.1,.1,1), {ambient: .9}),
                     menu: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/menu.png", true)}),
                     gameover: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/gameover.png", true)}),
-                    win: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/win.png", true)}),
+                    win: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/win.png", true)})
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
@@ -69,8 +69,15 @@ window.Final_Project = window.classes.Final_Project =
             this.turn_right = false;  
             
             this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]]; //[x,z]
+            this.new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];
+            this.colorArr = [Color.of(Math.random(),Math.random(),Math.random(),1),Color.of(Math.random(),Math.random(),Math.random(),1),
+                             Color.of(Math.random(),Math.random(),Math.random(),1),Color.of(Math.random(),Math.random(),Math.random(),1),
+                             Color.of(Math.random(),Math.random(),Math.random(),1),Color.of(Math.random(),Math.random(),Math.random(),1),
+                             Color.of(Math.random(),Math.random(),Math.random(),1),Color.of(Math.random(),Math.random(),Math.random(),1),
+                             Color.of(Math.random(),Math.random(),Math.random(),1),Color.of(Math.random(),Math.random(),Math.random(),1)];   
+
             this.aliveHumans = [true, true, true, true, true, true, true, true, true, true ];
-            this.ready = false;
+
             
             this.collision_distance = (Math.sqrt(29)/2) + (Math.sqrt(1.49)/2);
             this.score = 0;
@@ -90,6 +97,7 @@ window.Final_Project = window.classes.Final_Project =
             // this.key_triggered_button("Restart", ["t"], () => this.restart = () => true);
             // this.key_triggered_button("Pause", ["y"], () => this.pause = () => !this.pause);
             this.key_triggered_button("Start Game", ["b"], () => this.playing = () => true);
+
 
         }
 
@@ -143,7 +151,7 @@ window.Final_Project = window.classes.Final_Project =
             building2_transform = building2_transform.times(Mat4.translation([-2.2,1,1.6]));
             
             this.shapes.cube.draw(graphics_state,building1_transform,this.materials.building);
-            this.shapes.cube.draw(graphics_state,building2_transform,this.materials.building);
+            this.shapes.cube.draw(graphics_state,building2_transform,this.materials.building2);
 
             // Ground
             let world_transform = Mat4.identity();
@@ -174,10 +182,21 @@ window.Final_Project = window.classes.Final_Project =
 
             let human_transform = Mat4.identity();
 
-            if(/*!this.pause &&  */Math.floor(t)%2 == 0 && this.ready == false)
+            if(t%2 == 0 )
             {
+                for(var i = 0; i < 10; i += 1)
+                {
 
-                let new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];;
+                        if(this.aliveHumans[i]){
+                                this.new_transform[i][0] = ((Math.random()*2)-1);
+                                this.new_transform[i][1] = ((Math.random()*2)-1);
+
+                        }
+                }
+
+            }
+            else
+            {
                 for(var i = 0; i < 10; i += 1)
                 {
                         let distance = Math.pow(this.human_pos[i][0]-this.cop_x,2) + Math.pow(this.human_pos[i][1]-this.cop_z,2);
@@ -188,26 +207,30 @@ window.Final_Project = window.classes.Final_Project =
                                 this.score +=1;
                         }
 
-                        if(this.aliveHumans[i]){
-                                new_transform[i][0] = this.human_pos[i][0] + .5*Math.round((Math.random()*2)-1);
-                                new_transform[i][1] = this.human_pos[i][1] + .5*Math.round((Math.random()*2)-1);
-                                while(new_transform[i][0] >= 45 || new_transform[i][0] <= -45 || new_transform[i][1] >= 45 || new_transform[i][1] <= -45 || //ground boundaries
-                                        (( new_transform[i][0] <= 34 && new_transform[i][0] >= 10) && (new_transform[i][1] <= 6.4 && new_transform[i][1] >= -19.6)) || //building 1
-                                        (( new_transform[i][0] <= -10 && new_transform[i][0] >= -34) && (new_transform[i][1] <= 20.2 && new_transform[i][1] >= 2.2)) ||//building 2
-                                        (new_transform.indexOf(new_transform[i]) != new_transform.lastIndexOf(new_transform[i]))) //other people
+                        if(this.aliveHumans[i])
+                        {
+                                var x_dist = this.new_transform[i][0];
+                                var z_dist = this.new_transform[i][1];
+                                var new_x = x_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][0];
+                                var new_z = z_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][1];
+                                while(new_x >= 47 || new_x <= -47 || new_z >= 47 || new_z <= -47 || //ground boundaries
+                                        (( new_x <= 34 && new_x >= 10) && (new_z <= 6.4 && new_z >= -19.6)) || //building 1
+                                        (( new_x <= -10 && new_x >= -34) && (new_z <= 20.2 && new_z >= 2.2)) ||//building 2
+                                        (this.human_pos.indexOf([new_x,new_z]) != this.human_pos.lastIndexOf([new_x,new_z]))) //other people
                                 {
-                                        new_transform[i][0] = this.human_pos[i][0] + .5*Math.round((Math.random()*2)-1);
-                                        new_transform[i][1] = this.human_pos[i][1] + .5*Math.round((Math.random()*2)-1);                               
+                                       this.new_transform[i][0] = ((Math.random()*1.4)-.7);
+                                       this.new_transform[i][1] = ((Math.random()*1.4)-.7);
+                                       x_dist = this.new_transform[i][0];
+                                       z_dist = this.new_transform[i][1];
+                                       new_x = x_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][0];
+                                       new_z = z_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][1];                  
                                 }
-                                this.human_pos[i][0] = new_transform[i][0];
-                                this.human_pos[i][1] = new_transform[i][1];
+                                this.human_pos[i][0] = new_x;
+                                this.human_pos[i][1] = new_z;                               
                         }
+
                 }
-                this.ready = true;
-            }
-            else if( Math.floor(t)%2 != 0)
-            {
-                 this.ready = false;
+
             }
             
             for(var j = 0; j < 10; j+= 1)
@@ -215,7 +238,7 @@ window.Final_Project = window.classes.Final_Project =
                     if(this.aliveHumans[j])
                     {
                             human_transform = human_transform.times(Mat4.translation([this.human_pos[j][0],0,this.human_pos[j][1]]));
-                            this.drawHuman(graphics_state,human_transform)
+                            this.drawHuman(graphics_state,human_transform,this.colorArr[j]);
                     }
                     human_transform = Mat4.identity();
             }
@@ -262,16 +285,6 @@ window.Final_Project = window.classes.Final_Project =
             if (this.attached != null) {
                 graphics_state.camera_transform = this.attached();
             }
-
-
-            // if(this.restart)
-            // {
-            //     this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]];
-            //     this.aliveHumans = [true, true, true, true, true,true, true, true, true, true];
-            //     this.score = 0;
-            //     this.restart = false;
-                
-            // }
         }
 
         drawCopCar(graphics_state, initial_position, v) {
@@ -382,7 +395,7 @@ window.Final_Project = window.classes.Final_Project =
             this.shapes.torus.draw(graphics_state, wheel, this.materials.rubber);
         }
 
-        drawHuman(graphics_state, initial_position)
+        drawHuman(graphics_state, initial_position,color)
         {
                 let human_body = initial_position;
                 human_body = human_body.times(Mat4.scale([1,2,1]));
@@ -408,7 +421,7 @@ window.Final_Project = window.classes.Final_Project =
                 let leg2 = arm2;
                 leg2 = leg2.times(Mat4.translation([1.9,-2.8,0])).times(Mat4.scale([1,1.2,1]));
 
-                this.shapes.cube.draw(graphics_state, human_body, this.materials.test.override({color: Color.of(1,1,1,1)}));
+                this.shapes.cube.draw(graphics_state, human_body, this.materials.test.override({color: color}));
                 this.shapes.sphere.draw(graphics_state, head, this.materials.test);
 
                 
@@ -421,7 +434,7 @@ window.Final_Project = window.classes.Final_Project =
         hit_building(x, z) {
             if (x >= 45 || x <= -45 || z >= 45 || z <= -45 || //ground boundaries
             (( x <= 34 && x >= 10) && (z <= 6.4 && z >= -19.6)) || //building 1
-            (( x <= -10 && x >= -34) && (z <= 20.2 && z >= 2.2))) 
+            (( x <= -10 && x >= -34) && (z <= 20.2 && z >= 2.2))) //building 2
             {
                 return true;
             }
