@@ -67,6 +67,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]]; //[x,z]
             this.aliveHumans = [true, true, true, true, true, true, true, true, true, true ];
             this.ready = false;
+            
 
             this.score = 0;
         }
@@ -134,11 +135,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             this.shapes.cube.draw(graphics_state, road_transform, this.materials.road);
 
-//             // Bad Car
-//             let car_transform = Mat4.identity();
-//             car_transform = car_transform.times(Mat4.translation([0, 2.5, 0])).times(Mat4.scale([4, 4, 4]));
-//             //this.shapes.car.draw(graphics_state, car_transform, this.materials.car);
-
             let human_transform = Mat4.identity();
 
             if(!this.pause &&  Math.floor(t)%2 == 0 && this.ready == false)
@@ -150,16 +146,17 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                         let x_vals = [new_transform[i][0]+.65,new_transform[i][0]-.65];
                         let z_vals = [new_transform[i][1]+.35,new_transform[i][1]-.35];
                         let car_points = [];
+
                         if(this.aliveHumans[i]){
-                                new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
-                                new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;
+                                new_transform[i][0] = this.human_pos[i][0] + .5*Math.round((Math.random()*2)-1);
+                                new_transform[i][1] = this.human_pos[i][1] + .5*Math.round((Math.random()*2)-1);
                                 while(new_transform[i][0] >= 45 || new_transform[i][0] <= -45 || new_transform[i][1] >= 45 || new_transform[i][1] <= -45 || //ground boundaries
                                         (( new_transform[i][0] <= 34 && new_transform[i][0] >= 10) && (new_transform[i][1] <= 6.4 && new_transform[i][1] >= -19.6)) || //building 1
-                                        (( new_transform[i][0] <= -10 && new_transform[i][0] >= -34) && (new_transform[i][1] <= 20.2 && new_transform[i][1] >= 2.2)))// ||//building 2
-                                        //(new_transform.indexOf(new_transform[i]) != new_transform.lastIndexOf(new_transform[i]))) //other people
+                                        (( new_transform[i][0] <= -10 && new_transform[i][0] >= -34) && (new_transform[i][1] <= 20.2 && new_transform[i][1] >= 2.2)) ||//building 2
+                                        (new_transform.indexOf(new_transform[i]) != new_transform.lastIndexOf(new_transform[i]))) //other people
                                 {
-                                        new_transform[i][0] = this.human_pos[i][0] + (Math.random()*2)-1;
-                                        new_transform[i][1] = this.human_pos[i][1] + (Math.random()*2)-1;                               
+                                        new_transform[i][0] = this.human_pos[i][0] + .5*Math.round((Math.random()*2)-1);
+                                        new_transform[i][1] = this.human_pos[i][1] + .5*Math.round((Math.random()*2)-1);                               
                                 }
                                 this.human_pos[i][0] = new_transform[i][0];
                                 this.human_pos[i][1] = new_transform[i][1];
