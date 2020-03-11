@@ -1,5 +1,5 @@
-window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
-    class Assignment_Three_Scene extends Scene_Component {
+window.Final_Project = window.classes.Final_Project =
+    class Final_Project extends Scene_Component {
         constructor(context, control_box)
         {
             // The scene begins by requesting the camera, shapes, and materials it will need.
@@ -18,7 +18,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 square: new Square(),
                 cube: new Cube(),
                 torus: new Torus(15, 15),
-                car: new Shape_From_File( "assets/Small car.obj" ),
                 sphere: new Subdivision_Sphere(4)
             };
 
@@ -36,27 +35,30 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                     //building2: context.get_instance(Phong_Shader).material(Color.of(.23,.23,.23,1), {ambient: .5, texture: context.get_instance("assets/building2.jpg",false)}),
                     ground: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/ground.jpg", false)}),
                     road: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/asphalt.jpg", false)}),
-                    teapot: context.get_instance(Phong_Shader).material(Color.of( .5,.5,.5,1 ), { ambient: .3, diffusivity: .5, specularity: .5, texture: context.get_instance("assets/stars.png", false) }),
-                    car: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/carbodyD.png")}),
                     copBody: context.get_instance(Phong_Shader).material(Color.of(1,1,1,1), {ambient: .7}),
                     copTop: context.get_instance(Phong_Shader).material(Color.of(.2,.2,.2,1), {ambient: 1}),
                     copLight: context.get_instance(Phong_Shader).material(Color.of(.89,.09,.05,1), {ambient: 1}),
                     glass: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture: context.get_instance("assets/glass.png")}),
                     rubber: context.get_instance(Phong_Shader).material(Color.of(.1,.1,.1,1), {ambient: .9}),
-                      
+                    menu: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/menu.png", true)}),
+                    gameover: context.get_instance(Phong_Shader).material(Color.of(0,0,0,1), {ambient: 1, texture:context.get_instance("assets/gameover.png", true)}),
                 };
 
             this.lights = [new Light(Vec.of(5, -10, 5, 1), Color.of(0, 1, 1, 1), 1000)];
 
             //general controls
+            this.playing = false;
             this.restart = false;
             this.pause = false;
 
-            //this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
+            // music
+            //this.menu_music = new Audio()
+
             this.cop_car = Mat4.identity();
             this.cop_x = 0;
             this.cop_y = 1;
             this.cop_z = 0;
+            this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+30, this.cop_z-50), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
 
             this.move = false;
             this.move_direction = 1;
@@ -77,7 +79,6 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
             this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => Mat4.look_at(Vec.of(0, 100, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1)));
             this.key_triggered_button("Follow Cop Car", ["1"], () => this.attached = () => this.cop_cam);
-            this.key_triggered_button("Follow Bad Car", ["2"], () => this.attached = () => this.bad_cam);
             this.new_line();
             this.key_triggered_button("Move forward", ["i"], () => this.move = true, undefined, () => this.move = false);
             this.key_triggered_button("Move backward", ["k"], () => {this.move = true; this.move_direction = -1;}, undefined, () => {this.move = false; this.move_direction = 1});
@@ -85,8 +86,9 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.key_triggered_button("Turn left", ["j"], () => this.turn_left = true, undefined, () => this.turn_left = false);
             this.key_triggered_button("Turn right", ["l"], () => this.turn_right = true, undefined, () => this.turn_right = false);
             this.new_line();
-            this.key_triggered_button("Restart", ["r"], () => this.restart = () => true);
-            this.key_triggered_button("Pause", ["p"], () => this.pause = () => !this.pause);
+            this.key_triggered_button("Restart", ["t"], () => this.restart = () => true);
+            this.key_triggered_button("Pause", ["y"], () => this.pause = () => !this.pause);
+            this.key_triggered_button("Start Game", ["b"], () => this.playing = () => true);
 
         }
 
@@ -94,6 +96,28 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
             const t = graphics_state.animation_time/100, dt = graphics_state.animation_delta_time / 1000;
 
+            if (!this.playing) {
+                graphics_state.camera_transform = Mat4.look_at(Vec.of(1007, 1008, 978), Vec.of(1007, 1008, 990), Vec.of(0, 1, 0));
+                var menu_transform = Mat4.identity()
+                                                    .times(Mat4.translation([999,1000,990]))
+                                                    .times(Mat4.rotation(Math.PI, Vec.of(0,0,1)))
+                                                    .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
+                                                    .times(Mat4.scale([32,1,32]))
+                this.shapes.square.draw(graphics_state, menu_transform, this.materials.menu);
+            }
+            else if (this.hit_building(this.cop_x, this.cop_z))
+            {
+                graphics_state.camera_transform = Mat4.look_at(Vec.of(2007, 2008, 2978), Vec.of(2007, 2008, 2990), Vec.of(0, 1, 0));
+                var menu_transform = Mat4.identity()
+                                                    .times(Mat4.translation([1999,2000,2990]))
+                                                    .times(Mat4.rotation(Math.PI, Vec.of(0,0,1)))
+                                                    .times(Mat4.rotation(Math.PI/2, Vec.of(1,0,0)))
+                                                    .times(Mat4.scale([32,1,32]))
+                this.shapes.square.draw(graphics_state, menu_transform, this.materials.gameover);
+            }
+            else { 
+                graphics_state.camera_transform = this.cop_cam.map((x,i) => Vec.from(graphics_state.camera_transform[i]).mix(x,.5));
+            }
 
             //building 1
             let building1_transform = Mat4.identity();
@@ -212,15 +236,15 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 cop_velocity = 0;
             }
             
-            var x_camera_new = 40*Math.sin(this.cop_angle);
-            var z_camera_new = 40*Math.cos(this.cop_angle);
+            var x_camera_new = 50*Math.sin(this.cop_angle);
+            var z_camera_new = 50*Math.cos(this.cop_angle);
 
             this.cop_x += x_delta;
             this.cop_z += z_delta;
             cop_car = cop_car.times(Mat4.rotation(this.cop_angle, Vec.of(0,1,0)));
 
             // Recalculate Cop Camera Coords
-            this.cop_cam = Mat4.look_at(Vec.of(this.cop_x-x_camera_new, this.cop_y+20, this.cop_z-z_camera_new), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
+            this.cop_cam = Mat4.look_at(Vec.of(this.cop_x-x_camera_new, this.cop_y+30, this.cop_z-z_camera_new), Vec.of(this.cop_x, this.cop_y, this.cop_z), Vec.of(0,1,0));
 
             this.drawCopCar(graphics_state, cop_car, cop_velocity);            
             if (this.attached != null) {
@@ -381,6 +405,14 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 this.shapes.cube.draw(graphics_state,leg2, this.materials.test);
         }
 
-
+        hit_building(x, z) {
+            if (x >= 45 || x <= -45 || z >= 45 || z <= -45 || //ground boundaries
+            (( x <= 34 && x >= 10) && (z <= 6.4 && z >= -19.6)) || //building 1
+            (( x <= -10 && x >= -34) && (z <= 20.2 && z >= 2.2))) 
+            {
+                return true;
+            }
+            return false;
+        }
     };
 
