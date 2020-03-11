@@ -69,7 +69,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.aliveHumans = [true, true, true, true, true, true, true, true, true, true ];
             this.ready = false;
             
-
+            this.collision_distance = (Math.sqrt(29)/2) + (Math.sqrt(1.49)/2);
             this.score = 0;
         }
 
@@ -144,9 +144,13 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
                 let new_transform = [[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]];;
                 for(var i = 0; i < 10; i += 1)
                 {
-                        let x_vals = [new_transform[i][0]+.65,new_transform[i][0]-.65];
-                        let z_vals = [new_transform[i][1]+.35,new_transform[i][1]-.35];
-                        let car_points = [];
+                        let distance = Math.pow(this.human_pos[i][0]-this.cop_x,2) + Math.pow(this.human_pos[i][1]-this.cop_z,2);
+                        distance = Math.sqrt(distance);
+                        if(distance <= this.collision_distance)
+                        {
+                                this.aliveHumans[i] = false;
+                                this.score +=1;
+                        }
 
                         if(this.aliveHumans[i]){
                                 new_transform[i][0] = this.human_pos[i][0] + .5*Math.round((Math.random()*2)-1);
@@ -228,6 +232,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             {
                 this.human_pos = [[-3,37],[-4,18],[-26,-30],[23,27],[16,-36],[3,-37],[4,-18],[39,15],[-43,-10],[-16,36]];
                 this.aliveHumans = [true, true, true, true, true,true, true, true, true, true];
+                this.score = 0;
                 this.restart = false;
             }
         }
@@ -343,7 +348,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
         drawHuman(graphics_state, initial_position)
         {
                 let human_body = initial_position;
-                human_body = human_body.times(Mat4.scale([1,2,.7]));
+                human_body = human_body.times(Mat4.scale([1,2,1]));
                 human_body = human_body.times(Mat4.translation([.65,1.6,0])) .times(Mat4.scale([.5,.5,.5]));
                 
                 let head = initial_position;
