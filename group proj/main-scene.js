@@ -61,6 +61,7 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
             this.move = false;
             this.move_direction = 1;
             this.cop_front_rotation = 0;
+            this.cop_angle = 0;
             this.turn_left = false;
             this.turn_right = false;  
             
@@ -188,30 +189,31 @@ window.Assignment_Three_Scene = window.classes.Assignment_Three_Scene =
 
             if (this.turn_left) {
                 if (this.cop_front_rotation < max_turning_angle)
-                    this.cop_front_rotation += Math.PI*dt/4;
+                    this.cop_front_rotation += Math.PI*dt;
             }
             else if (this.turn_right) {
                 if (this.cop_front_rotation > -max_turning_angle)
-                    this.cop_front_rotation -= Math.PI*dt/4;
+                    this.cop_front_rotation -= Math.PI*dt;
             }
 
             let cop_car = Mat4.identity().times(Mat4.translation([this.cop_x, 1, this.cop_z]));
             let cop_header = Vec.of(this.cop_x, this.cop_y, this.cop_z);
             if (this.move) {
-                cop_velocity = 5*this.move_direction*dt;
-                this.cop_x += cop_velocity*Math.asin(this.cop_front_rotation);
-                this.cop_z += cop_velocity*Math.acos(this.cop_front_rotation);
+                cop_velocity = 10*this.move_direction*dt;
+                this.cop_x += cop_velocity*Math.sin(this.cop_angle);
+                this.cop_z += cop_velocity*Math.cos(this.cop_angle);
+
+                this.cop_angle += this.move_direction*this.cop_front_rotation/50;
             }
             else {
                 cop_velocity = 0;
             }
-            cop_car = cop_car.times(Mat4.rotation(this.cop_front_rotation, Vec.of(0,1,0)));
+            cop_car = cop_car.times(Mat4.rotation(this.cop_angle, Vec.of(0,1,0)));
 
             // Recalculate Cop Camera Coords
             this.cop_cam = Mat4.look_at(Vec.of(this.cop_x, this.cop_y+20, this.cop_z-40), cop_header, Vec.of(0,1,0));
 
             this.drawCopCar(graphics_state, cop_car, cop_velocity);            
-
             if (this.attached != null) {
                 graphics_state.camera_transform = this.attached();
             }
