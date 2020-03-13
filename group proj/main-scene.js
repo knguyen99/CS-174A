@@ -85,9 +85,9 @@ window.Final_Project = window.classes.Final_Project =
 
         make_control_panel() {
             // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-            this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => Mat4.look_at(Vec.of(0, 100, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1)));
-            this.key_triggered_button("Follow Cop Car", ["1"], () => this.attached = () => this.cop_cam);
-            this.new_line();
+            // this.key_triggered_button("Aerial View", ["0"], () => this.attached = () => Mat4.look_at(Vec.of(0, 100, 0), Vec.of(0, 0, 0), Vec.of(0, 0, 1)));
+            // this.key_triggered_button("Follow Cop Car", ["1"], () => this.attached = () => this.cop_cam);
+            // this.new_line();
             this.key_triggered_button("Move forward", ["i"], () => this.move = true, undefined, () => this.move = false);
             this.key_triggered_button("Move backward", ["k"], () => {this.move = true; this.move_direction = -1;}, undefined, () => {this.move = false; this.move_direction = 1});
             this.new_line();
