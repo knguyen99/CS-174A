@@ -103,7 +103,7 @@ window.Final_Project = window.classes.Final_Project =
 
         display(graphics_state) {
             graphics_state.lights = this.lights;        // Use the lights stored in this.lights.
-            const t = graphics_state.animation_time/100, dt = graphics_state.animation_delta_time / 1000;
+            const t = graphics_state.animation_time/1000, dt = graphics_state.animation_delta_time / 1000;
 
             if (!this.playing) {
                 graphics_state.camera_transform = Mat4.look_at(Vec.of(1007, 1008, 978), Vec.of(1007, 1008, 990), Vec.of(0, 1, 0));
@@ -182,7 +182,7 @@ window.Final_Project = window.classes.Final_Project =
 
             let human_transform = Mat4.identity();
 
-            if(t%2 == 0 )
+            if(Math.floor((t%2)*10) == 19 )
             {
                 for(var i = 0; i < 10; i += 1)
                 {
@@ -193,7 +193,7 @@ window.Final_Project = window.classes.Final_Project =
 
                         }
                 }
-
+                console.log("working");
             }
             else
             {
@@ -211,8 +211,8 @@ window.Final_Project = window.classes.Final_Project =
                         {
                                 var x_dist = this.new_transform[i][0];
                                 var z_dist = this.new_transform[i][1];
-                                var new_x = x_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][0];
-                                var new_z = z_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][1];
+                                var new_x = x_dist + this.human_pos[i][0];
+                                var new_z = z_dist+ this.human_pos[i][1];
                                 while(new_x >= 47 || new_x <= -47 || new_z >= 47 || new_z <= -47 || //ground boundaries
                                         (( new_x <= 34 && new_x >= 10) && (new_z <= 6.4 && new_z >= -19.6)) || //building 1
                                         (( new_x <= -10 && new_x >= -34) && (new_z <= 20.2 && new_z >= 2.2)) ||//building 2
@@ -222,8 +222,8 @@ window.Final_Project = window.classes.Final_Project =
                                        this.new_transform[i][1] = ((Math.random()*1.4)-.7);
                                        x_dist = this.new_transform[i][0];
                                        z_dist = this.new_transform[i][1];
-                                       new_x = x_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][0];
-                                       new_z = z_dist*Math.sin(((t%2)/2)*Math.PI/2) + this.human_pos[i][1];                  
+                                       new_x = x_dist + this.human_pos[i][0];
+                                       new_z = z_dist + this.human_pos[i][1];                  
                                 }
                                 this.human_pos[i][0] = new_x;
                                 this.human_pos[i][1] = new_z;                               
